@@ -11,6 +11,15 @@ const dbConfig = {
   // Remove database from initial config to avoid connection issues
 };
 
+// Debug logging for environment variables
+console.log('🔍 Database Configuration Debug:');
+console.log('DB_HOST:', process.env.DB_HOST || 'localhost (default)');
+console.log('DB_USER:', process.env.DB_USER || 'root (default)');
+console.log('DB_PORT:', process.env.DB_PORT || '3306 (default)');
+console.log('DB_NAME:', process.env.DB_NAME || 'attendance_db (default)');
+console.log('DB_SSL:', process.env.DB_SSL || 'false (default)');
+console.log('NODE_ENV:', process.env.NODE_ENV || 'development (default)');
+
 // Create connection pool without database initially
 const pool = mysql.createPool({
   ...dbConfig,
