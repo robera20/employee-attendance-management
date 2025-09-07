@@ -13,8 +13,10 @@ const dbConfig = {
 
 // Debug logging for environment variables
 console.log('🔍 Database Configuration Debug:');
+console.log('All environment variables:', Object.keys(process.env).filter(key => key.startsWith('DB_')));
 console.log('DB_HOST:', process.env.DB_HOST || 'localhost (default)');
 console.log('DB_USER:', process.env.DB_USER || 'root (default)');
+console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? '***SET***' : 'NOT SET');
 console.log('DB_PORT:', process.env.DB_PORT || '3306 (default)');
 console.log('DB_NAME:', process.env.DB_NAME || 'attendance_db (default)');
 console.log('DB_SSL:', process.env.DB_SSL || 'false (default)');
@@ -140,11 +142,13 @@ async function executeSelect(sql, params = []) {
 pool.getConnection((err, connection) => {
   if (err) {
     console.error('❌ Database connection failed:', err.message);
-    console.log('💡 Make sure XAMPP MySQL is running');
+    console.log('💡 Make sure database is running and accessible');
+    console.log('🔍 Attempting connection to:', process.env.DB_HOST || 'localhost');
     return;
   }
   
-  console.log('✅ Connected to XAMPP MySQL successfully');
+  console.log('✅ Connected to database successfully');
+  console.log('🔍 Connected to host:', process.env.DB_HOST || 'localhost');
   connection.release();
 });
 
