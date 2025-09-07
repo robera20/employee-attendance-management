@@ -8,8 +8,28 @@
   ],
   "routes": [
     {
+      "src": "/css/(.*)",
+      "dest": "/Frontend/css/$1"
+    },
+    {
+      "src": "/js/(.*)",
+      "dest": "/Frontend/js/$1"
+    },
+    {
+      "src": "/html/(.*)",
+      "dest": "/Frontend/html/$1"
+    },
+    {
+      "src": "/face-models/(.*)",
+      "dest": "/Frontend/face-models/$1"
+    },
+    {
+      "src": "/images/(.*)",
+      "dest": "/images/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "server.js"
+      "dest": "/server.js"
     }
   ],
   "env": {
