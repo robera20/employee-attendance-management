@@ -6,6 +6,26 @@ const path = require('path');
 // Import database connection
 const db = require('./db');
 
+// Test DNS resolution
+const dns = require('dns');
+const { promisify } = require('util');
+const dnsLookup = promisify(dns.lookup);
+
+async function testDNS() {
+  try {
+    console.log('🔍 Testing DNS resolution for sql.freedb.tech...');
+    const result = await dnsLookup('sql.freedb.tech');
+    console.log('✅ DNS Resolution Result:');
+    console.log('  Address:', result.address);
+    console.log('  Family:', result.family);
+  } catch (error) {
+    console.error('❌ DNS lookup failed:', error.message);
+  }
+}
+
+// Run DNS test
+testDNS();
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const employeeRoutes = require('./routes/employee');
