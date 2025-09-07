@@ -8,8 +8,7 @@
     "dev": "nodemon server.js",
     "quick-setup": "node quick-setup.js",
     "test-db": "node test-db-connection.js",
-    "init-db": "node init-database.js",
-    "vercel-build": "echo 'Build complete'"
+    "init-db": "node init-database.js"
   },
   "keywords": [
     "attendance",

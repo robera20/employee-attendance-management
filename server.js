@@ -21,20 +21,7 @@ app.use(cors());
 // Body parsing middleware with increased limits for face training
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
-// Serve static files with proper MIME types
-app.use(express.static('Frontend', {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    } else if (path.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    } else if (path.endsWith('.html')) {
-      res.setHeader('Content-Type', 'text/html');
-    } else if (path.endsWith('.json')) {
-      res.setHeader('Content-Type', 'application/json');
-    }
-  }
-}));
+app.use(express.static('Frontend'));
 
 // Serve project images directory at /images
 app.use('/images', express.static(path.join(__dirname, 'images')));
