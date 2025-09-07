@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Profile - ECC Smart Attendance</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar glass">
+        <div class="container">
+            <a href="dashboard.html" class="brand profile-brand">
+                <div class="brand-logo-wrap">
+                    <img src="/images/images.png" alt="ECC Logo" class="brand-logo-img">
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">ECC Smart Attendance</span>
+                    <span class="brand-subtitle">Admin Profile</span>
+                </div>
+            </a>
+            <div class="nav-actions">
+                <a class="btn btn-secondary" href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <button id="logoutBtn" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Sign out</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container profile-container">
+        <div class="profile-grid">
+            <section class="profile-card">
+                <h2 class="profile-title"><i class="fas fa-user"></i> Profile Information</h2>
+                <form id="profileForm" class="profile-form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input id="name" name="name" type="text" class="input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input id="email" name="email" type="email" class="input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input id="phone" name="phone" type="tel" class="input">
+                    </div>
+                    <div class="form-group">
+                        <label for="organization">Organization</label>
+                        <input id="organization" name="organization" type="text" class="input">
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input id="username" name="username" type="text" class="input" required>
+                    </div>
+                    <div class="profile-actions">
+                        <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="profile-card">
+                <h2 class="profile-title"><i class="fas fa-key"></i> Change Password</h2>
+                <form id="passwordForm" class="profile-form">
+                    <div class="form-group">
+                        <label for="current_password">Current Password</label>
+                        <input id="current_password" name="current_password" type="password" class="input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password">New Password</label>
+                        <input id="new_password" name="new_password" type="password" class="input" required>
+                    </div>
+                    <div class="profile-actions">
+                        <button type="submit" class="btn btn-warning" id="savePasswordBtn">
+                            <i class="fas fa-unlock"></i> Update Password
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <script src="../js/profile.js"></script>
+</body>
+<script>
+(function(){
+    const base = window.location.origin.includes(':5000') ? window.location.origin : 'http://localhost:5000';
+    const navLinks = [
+        ['a.nav-link[href="dashboard.html"]', '/dashboard.html'],
+        ['a.nav-link[href="employees.html"]', '/employees.html'],
+        ['a.nav-link[href="scanner.html"]', '/scanner.html'],
+        ['a.nav-link[href="reports.html"]', '/reports.html'],
+        ['a.nav-link[href="profile.html"]', '/profile.html']
+    ];
+    navLinks.forEach(([sel, path]) => {
+        const el = document.querySelector(sel);
+        if (el) el.href = base + path;
+    });
+})();
+</script>
+</html>

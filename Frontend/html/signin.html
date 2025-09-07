@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Admin Login - Smart Attendance System</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Signin Page Specific Styles */
+        .signin-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            animation: float-slow 8s ease-in-out infinite;
+        }
+
+        .circle-1 {
+            width: 120px;
+            height: 120px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .circle-2 {
+            width: 80px;
+            height: 80px;
+            top: 30%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .circle-3 {
+            width: 100px;
+            height: 100px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        .circle-4 {
+            width: 60px;
+            height: 60px;
+            bottom: 10%;
+            right: 25%;
+            animation-delay: 1s;
+        }
+
+        @keyframes float-slow {
+            0%, 100% {
+                transform: translateY(0px) scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateY(-30px) scale(1.1);
+                opacity: 0.9;
+            }
+        }
+
+        .signin-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            position: relative;
+        }
+
+        .signin-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            padding: 3rem;
+            width: 100%;
+            max-width: 480px;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .signin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            border-radius: 2rem 2rem 0 0;
+        }
+
+        .signin-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .signin-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+            }
+            50% {
+                box-shadow: 0 10px 35px rgba(59, 130, 246, 0.5);
+            }
+        }
+
+        .signin-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #1f2937, #374151);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .signin-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .signin-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 1.125rem;
+            z-index: 2;
+            transition: color 0.2s ease;
+        }
+
+        .signin-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .signin-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .signin-input:focus + .input-icon {
+            color: #3b82f6;
+        }
+
+        .input-group:focus-within .input-icon {
+            color: #3b82f6;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: color 0.2s ease;
+        }
+
+        .password-toggle:hover {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 1rem 0;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .remember-checkbox {
+            width: 1rem;
+            height: 1rem;
+            accent-color: #3b82f6;
+        }
+
+        .forgot-password {
+            font-size: 0.875rem;
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-password:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        .signin-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .signin-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .signin-button:hover::before {
+            left: 100%;
+        }
+
+        .signin-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
+        }
+
+        .signin-button:active {
+            transform: translateY(0);
+        }
+
+        .signin-button.loading {
+            pointer-events: none;
+        }
+
+        .signin-button.loading::after {
+            content: '';
+            position: absolute;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .divider::before {
+            margin-right: 1rem;
+        }
+
+        .divider::after {
+            margin-left: 1rem;
+        }
+
+        .social-login {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .social-btn:hover {
+            border-color: #d1d5db;
+            background: #f9fafb;
+            transform: translateY(-1px);
+        }
+
+        .signup-prompt {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .signup-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .signup-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        .security-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .back-to-home {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .back-to-home:hover {
+            color: #374151;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            .signin-card {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+                border-radius: 1.5rem;
+            }
+
+            .signin-title {
+                font-size: 1.875rem;
+            }
+
+            .signin-logo {
+                width: 60px;
+                height: 60px;
+            }
+
+            .social-login {
+                grid-template-columns: 1fr;
+            }
+
+            .form-options {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+
+        /* Dark mode support (future enhancement) */
+        @media (prefers-color-scheme: dark) {
+            .signin-card {
+                background: rgba(17, 24, 39, 0.95);
+                border-color: rgba(55, 65, 81, 0.3);
+            }
+
+            .signin-title {
+                background: linear-gradient(135deg, #f9fafb, #e5e7eb);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .signin-subtitle {
+                color: #9ca3af;
+            }
+
+            .signin-input {
+                background: rgba(31, 41, 55, 0.9);
+                border-color: #374151;
+                color: #f9fafb;
+            }
+
+            .signin-input:focus {
+                background: rgba(31, 41, 55, 1);
+            }
+        }
+
+        /* Accessibility improvements */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background with floating elements -->
+    <div class="signin-background">
+        <div class="floating-elements">
+            <div class="floating-circle circle-1"></div>
+            <div class="floating-circle circle-2"></div>
+            <div class="floating-circle circle-3"></div>
+            <div class="floating-circle circle-4"></div>
+        </div>
+    </div>
+
+    <!-- Main Signin Container -->
+    <div class="signin-container">
+        <div class="signin-card">
+            <!-- Security Badge -->
+            <div class="security-badge">
+                <i class="fas fa-shield-alt"></i>
+                Secure
+            </div>
+
+            <!-- Back to Home Link -->
+            <a href="index.html" class="back-to-home">
+                <i class="fas fa-arrow-left"></i>
+                Back to Home
+            </a>
+
+            <!-- Header Section -->
+            <div class="signin-header">
+                <div class="signin-logo">
+                    <i class="fas fa-lock" style="font-size: 2rem; color: white;"></i>
+                </div>
+                <h1 class="signin-title">Welcome Back</h1>
+                <p class="signin-subtitle">
+                    Sign in to access your Smart Attendance dashboard and manage employee data securely.
+                </p>
+            </div>
+
+            <!-- Signin Form -->
+            <form id="signinForm" class="signin-form">
+                <!-- Username Field -->
+                <div class="input-group">
+                    <i class="fas fa-user input-icon"></i>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        class="signin-input"
+                        placeholder="Enter your username"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+
+                <!-- Password Field -->
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="signin-input"
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    >
+                    <button type="button" class="password-toggle" id="passwordToggle">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+                <!-- Form Options -->
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" class="remember-checkbox" id="rememberMe">
+                        Remember me
+                    </label>
+                    <a href="#" class="forgot-password" id="forgotPassword">
+                        Forgot Password?
+                    </a>
+                </div>
+
+                <!-- Signin Button -->
+                <button type="submit" class="signin-button" id="signinButton">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Sign In Securely</span>
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div class="divider">
+                or continue with
+            </div>
+
+            <!-- Social Login (Future Enhancement) -->
+            <div class="social-login">
+                <a href="#" class="social-btn" title="Google Login - Coming Soon">
+                    <i class="fab fa-google"></i>
+                    Google
+                </a>
+                <a href="#" class="social-btn" title="Microsoft Login - Coming Soon">
+                    <i class="fab fa-microsoft"></i>
+                    Microsoft
+                </a>
+            </div>
+
+            <!-- Signup Prompt -->
+            <div class="signup-prompt">
+                Don't have an admin account?
+                <a href="signup.html" class="signup-link">Create one now</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/signin.js"></script>
+    <script>
+        // Enhanced signin page interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Password toggle functionality
+            const passwordToggle = document.getElementById('passwordToggle');
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = passwordToggle.querySelector('i');
+
+            passwordToggle.addEventListener('click', function() {
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                passwordIcon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+            });
+
+            // Social login placeholders
+            const socialButtons = document.querySelectorAll('.social-btn');
+            socialButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    alert('Social login will be available in the next update!');
+                });
+            });
+
+            // Enhanced form validation
+            const form = document.getElementById('signinForm');
+            const inputs = form.querySelectorAll('.signin-input');
+
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.value.trim()) {
+                        this.classList.add('valid');
+                    } else {
+                        this.classList.remove('valid');
+                    }
+                });
+
+                input.addEventListener('input', function() {
+                    if (this.classList.contains('invalid')) {
+                        this.classList.remove('invalid');
+                    }
+                });
+            });
+
+            // Loading state handled by external script (../js/signin.js)
+
+            // Remember me functionality
+            const rememberCheckbox = document.getElementById('rememberMe');
+            const savedUsername = localStorage.getItem('rememberedUsername');
+
+            if (savedUsername) {
+                document.getElementById('username').value = savedUsername;
+                rememberCheckbox.checked = true;
+            }
+
+            rememberCheckbox.addEventListener('change', function() {
+                const username = document.getElementById('username').value;
+                if (this.checked && username) {
+                    localStorage.setItem('rememberedUsername', username);
+                } else {
+                    localStorage.removeItem('rememberedUsername');
+                }
+            });
+
+            // Auto-focus on username field
+            document.getElementById('username').focus();
+
+            // Forgot password functionality
+            document.getElementById('forgotPassword').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Password reset functionality will be implemented. Please contact your system administrator.');
+            });
+        });
+    </script>
+</body>
+</html>

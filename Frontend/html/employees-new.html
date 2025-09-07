@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management - Smart Attendance System</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .employees-header {
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .employees-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .employees-subtitle {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .employees-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .stat-mini-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-mini-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-mini-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .employees-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--surface-50);
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--surface-200);
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-container {
+            position: relative;
+            min-width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 2px solid var(--surface-300);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            background: var(--surface-50);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--surface-300);
+            border-radius: 0.5rem;
+            background: var(--surface-50);
+            font-size: 0.875rem;
+            min-width: 150px;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .view-toggle {
+            display: flex;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 2px solid var(--surface-300);
+        }
+
+        .view-toggle-btn {
+            padding: 0.75rem 1rem;
+            background: var(--surface-50);
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .view-toggle-btn.active {
+            background: var(--primary-500);
+            color: white;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--surface-200);
+            border-top: 4px solid var(--primary-500);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal h2 {
+            margin: 0 0 1.5rem 0;
+            color: #1f2937;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #1f2937;
+            margin-right: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        #qrCodeContainer {
+            margin: 2rem 0;
+        }
+
+        #qrCodeContainer img {
+            max-width: 300px;
+            height: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--surface-300);
+        }
+
+        .empty-state-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .empty-state-description {
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+        }
+
+        /* Table View Styles */
+        .employees-table-container {
+            background: var(--surface-50);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--surface-200);
+            overflow: hidden;
+        }
+
+        .employees-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .employees-table th {
+            background: var(--surface-100);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--surface-200);
+        }
+
+        .employees-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--surface-200);
+            vertical-align: middle;
+        }
+
+        .employees-table tr:hover {
+            background: var(--surface-50);
+        }
+
+        .table-name {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .table-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .table-action-btn {
+            padding: 0.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: 0.875rem;
+        }
+
+        .table-action-btn.action-btn-primary {
+            background: var(--primary-500);
+            color: white;
+        }
+
+        .table-action-btn.action-btn-primary:hover {
+            background: var(--primary-600);
+        }
+
+        .table-action-btn.action-btn-secondary {
+            background: var(--surface-200);
+            color: var(--text-secondary);
+        }
+
+        .table-action-btn.action-btn-secondary:hover {
+            background: var(--surface-300);
+        }
+
+        /* Employee Status Styles */
+        .employee-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: var(--success-50);
+            color: var(--success-700);
+        }
+
+        .status-active i {
+            color: var(--success-500);
+        }
+    </style>
+</head>
+<body class="page-container">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="dashboard.html" class="nav-brand profile-brand">
+                <div class="brand-logo-wrap"><img src="/images/images.png" alt="ECC" class="brand-logo-img"></div>
+                <div class="brand-text">
+                    <h1 style="margin:0;color:#fff;font-size:1.5rem;">ECC Smart Attendance</h1>
+                    <span class="brand-subtitle">Employee Management</span>
+                </div>
+            </a>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="employees-new.html" class="nav-link active">
+                    <i class="fas fa-users"></i>
+                    <span>Employees</span>
+                </a>
+                <a href="scanner.html" class="nav-link">
+                    <i class="fas fa-qrcode"></i>
+                    <span>Scanner</span>
+                </a>
+                <a href="reports.html" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="#" class="nav-link" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="employees-header">
+        <div class="container">
+            <h1 class="employees-title">Employee Management</h1>
+            <p class="employees-subtitle">Manage employee records, attendance data, and organizational structure</p>
+
+            <div class="employees-stats">
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value" id="totalEmployees">0</div>
+                    <div class="stat-mini-label">Total Employees</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value" id="activeEmployees">0</div>
+                    <div class="stat-mini-label">Active</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value" id="newThisMonth">0</div>
+                    <div class="stat-mini-label">New This Month</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value" id="departments">0</div>
+                    <div class="stat-mini-label">Departments</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Toolbar -->
+        <div class="employees-toolbar">
+            <div class="toolbar-left">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input
+                        type="text"
+                        class="search-input"
+                        placeholder="Search employees by name, email, or ID..."
+                        id="employeeSearch"
+                    >
+                </div>
+                <select class="filter-select" id="departmentFilter">
+                    <option value="">All Departments</option>
+                    <option value="IT">IT</option>
+                    <option value="HR">HR</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Operations">Operations</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="toolbar-right">
+                <div class="view-toggle">
+                    <button class="view-toggle-btn active" data-view="cards">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="view-toggle-btn" data-view="table">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+
+                <button class="btn btn-primary" onclick="showAddEmployeeModal()">
+                    <i class="fas fa-plus"></i>
+                    Add Employee
+                </button>
+
+                <button class="btn btn-outline" onclick="exportEmployees()">
+                    <i class="fas fa-download"></i>
+                    Export
+                </button>
+            </div>
+        </div>
+
+        <!-- Employees Cards View -->
+        <div id="employeesCardsView" class="employees-grid">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="empty-state-title">No Employees Found</h3>
+                <p class="empty-state-description">
+                    Get started by adding your first employee to the system.
+                </p>
+                <button class="btn btn-primary" onclick="showAddEmployeeModal()">
+                    <i class="fas fa-plus"></i>
+                    Add First Employee
+                </button>
+            </div>
+        </div>
+
+        <!-- Employees Table View -->
+        <div id="employeesTableView" class="employees-table-container" style="display: none;">
+            <table class="employees-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Department</th>
+                        <th>Position</th>
+                        <th>Status</th>
+                        <th>Join Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="employeesTableBody">
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Add Employee Modal -->
+    <div id="addEmployeeModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Employee</h2>
+            <form id="addEmployeeForm">
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter employee's full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter email address">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" required placeholder="Enter phone number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="position">Position</label>
+                    <input type="text" id="position" name="position" placeholder="Enter job position">
+                </div>
+                
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <select id="department" name="department">
+                        <option value="">Select Department</option>
+                        <option value="IT">IT</option>
+                        <option value="HR">HR</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="text-center">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddEmployeeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Add Employee
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrCodeModal" class="modal">
+        <div class="modal-content text-center">
+            <h2>Employee QR Code</h2>
+            <div id="qrCodeContainer">
+                <img id="qrCodeImage" src="" alt="QR Code">
+            </div>
+            <div>
+                <h3 id="employeeName"></h3>
+                <p id="employeeId"></p>
+            </div>
+            <div>
+                <button class="btn btn-secondary" onclick="downloadQRCode()">
+                    <i class="fas fa-download"></i>
+                    Download QR Code
+                </button>
+                <button class="btn btn-primary" onclick="closeQRCodeModal()">
+                    <i class="fas fa-check"></i>
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEmployeesPage();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // View toggle functionality
+            const viewButtons = document.querySelectorAll('.view-toggle-btn');
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const view = this.dataset.view;
+                    toggleView(view);
+                });
+            });
+
+            // Search functionality
+            const searchInput = document.getElementById('employeeSearch');
+            searchInput.addEventListener('input', debounce(filterEmployees, 300));
+
+            // Department filter
+            const departmentFilter = document.getElementById('departmentFilter');
+            departmentFilter.addEventListener('change', filterEmployees);
+        }
+
+        async function initializeEmployeesPage() {
+            console.log('🚀 Initializing employees page...');
+            try {
+                showLoading();
+                console.log('⏳ Loading employees...');
+                const employees = await loadEmployees();
+                hideLoading();
+                
+                console.log('📊 Employees loaded:', employees);
+                updateStats();
+                console.log('✅ Employees page initialized successfully');
+            } catch (error) {
+                console.error('❌ Error during employees page initialization:', error);
+                hideLoading();
+                showNotification('Failed to load employees. Please refresh the page.', 'error');
+            }
+        }
+
+        async function loadEmployees() {
+            try {
+                const response = await fetch('/employee/list', { credentials: 'include' });
+                
+                if (response.status === 401) {
+                    // Authentication required - redirect to login
+                    showNotification('Please log in to view employees', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'signin.html';
+                    }, 2000);
+                    return [];
+                }
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Backend returns { employees: [...] }
+                    const employees = Array.isArray(result) ? result : (result.employees || []);
+                    renderEmployeeCards(employees);
+                    renderEmployeeTable(employees);
+                    updateEmployeeStats(employees.length);
+                    return employees;
+                } else {
+                    console.error('Failed to load employees:', result.error);
+                    throw new Error(result.error || 'Failed to load employees');
+                }
+            } catch (error) {
+                console.error('Error loading employees:', error);
+                // Show empty state instead of throwing error
+                renderEmployeeCards([]);
+                renderEmployeeTable([]);
+                updateEmployeeStats(0);
+                return [];
+            }
+        }
+
+        function renderEmployeeCards(employees) {
+            const container = document.getElementById('employeesCardsView');
+
+            if (!container) {
+                console.error('❌ employeesCardsView element not found');
+                return;
+            }
+
+            if (employees.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="empty-state-title">No Employees Found</h3>
+                        <p class="empty-state-description">
+                            Get started by adding your first employee to the system.
+                        </p>
+                        <button class="btn btn-primary" onclick="showAddEmployeeModal()">
+                            <i class="fas fa-plus"></i>
+                            Add First Employee
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = employees.map(employee => `
+                <div class="employee-card">
+                    <div class="employee-header">
+                        <div class="employee-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h3 class="employee-name">${employee.name}</h3>
+                        <p class="employee-role">${employee.position || 'Position not set'}</p>
+                    </div>
+                    <div class="employee-body">
+                        <div class="employee-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Email</span>
+                                <span class="detail-value">${employee.email}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Department</span>
+                                <span class="detail-value">${employee.department || 'Not assigned'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Phone</span>
+                                <span class="detail-value">${employee.phone}</span>
+                            </div>
+                        </div>
+                        <div class="employee-status">
+                            <span class="status-active">Active</span>
+                        </div>
+                        <div class="employee-actions">
+                            <button class="action-btn action-btn-primary" onclick="editEmployee(${employee.employee_id})">
+                                <i class="fas fa-edit"></i>
+                                Edit
+                            </button>
+                            <button class="action-btn action-btn-secondary" onclick="viewEmployee(${employee.employee_id})">
+                                <i class="fas fa-eye"></i>
+                                View
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderEmployeeTable(employees) {
+            const tbody = document.getElementById('employeesTableBody');
+            if (!tbody) {
+                console.error('❌ employeesTableBody element not found');
+                return;
+            }
+            tbody.innerHTML = employees.map(employee => `
+                <tr>
+                    <td>
+                        <div class="table-name">
+                            <div class="table-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <div>${employee.name}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">${employee.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${employee.department || 'Not assigned'}</td>
+                    <td>${employee.position || 'Not set'}</td>
+                    <td>
+                        <span class="employee-status status-active">
+                            <i class="fas fa-circle"></i>
+                            Active
+                        </span>
+                    </td>
+                    <td>${formatDate(new Date())}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="table-action-btn action-btn-primary" onclick="editEmployee(${employee.employee_id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="table-action-btn action-btn-secondary" onclick="viewEmployee(${employee.employee_id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStats() {
+            const totalEl = document.getElementById('totalEmployees');
+            const activeEl = document.getElementById('activeEmployees');
+            const newEl = document.getElementById('newThisMonth');
+            const deptEl = document.getElementById('departments');
+
+            if (totalEl) totalEl.textContent = '3';
+            if (activeEl) activeEl.textContent = '2';
+            if (newEl) newEl.textContent = '1';
+            if (deptEl) deptEl.textContent = '3';
+        }
+
+        function showAddEmployeeModal() {
+            document.getElementById('addEmployeeModal').style.display = 'flex';
+            document.getElementById('addEmployeeForm').reset();
+        }
+
+        function closeAddEmployeeModal() {
+            document.getElementById('addEmployeeModal').style.display = 'none';
+        }
+
+        // Make modal functions globally accessible
+        window.showAddEmployeeModal = showAddEmployeeModal;
+        window.closeAddEmployeeModal = closeAddEmployeeModal;
+        
+        // Also make showQRModal globally accessible if it exists
+        if (typeof showQRModal !== 'undefined') {
+            window.showQRModal = showQRModal;
+        }
+
+        function showQRCode(qrCodeImage, employeeName, employeeId) {
+            document.getElementById('qrCodeImage').src = qrCodeImage;
+            document.getElementById('employeeName').textContent = employeeName;
+            document.getElementById('employeeId').textContent = `Employee ID: ${employeeId}`;
+            document.getElementById('qrCodeModal').style.display = 'flex';
+        }
+
+        function closeQRCodeModal() {
+            document.getElementById('qrCodeModal').style.display = 'none';
+        }
+
+        function downloadQRCode() {
+            const qrImage = document.getElementById('qrCodeImage');
+            if (qrImage && qrImage.src) {
+                const link = document.createElement('a');
+                link.download = 'employee-qr-code.png';
+                link.href = qrImage.src;
+                link.click();
+            }
+        }
+
+        function editEmployee(id) {
+            showNotification('Edit Employee functionality will be implemented soon!', 'info');
+        }
+
+        function viewEmployee(id) {
+            showNotification('View Employee functionality will be implemented soon!', 'info');
+        }
+
+        function filterEmployees() {
+            const searchTerm = document.getElementById('employeeSearch').value.toLowerCase();
+            const department = document.getElementById('departmentFilter').value;
+            console.log('Filtering:', { searchTerm, department });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString();
+        }
+
+        function showLoading() {
+            document.body.insertAdjacentHTML('beforeend', `
+                <div id="loadingOverlay" class="loading-overlay">
+                    <div class="loading-spinner"></div>
+                </div>
+            `);
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                max-width: 400px;
+            `;
+
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: white; cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'signin.html';
+            }
+        }
+
+        function exportEmployees() {
+            showNotification('Employee data export started. You will receive a download link shortly.', 'info');
+        }
+
+        function toggleView(view) {
+            const cardsView = document.getElementById('employeesCardsView');
+            const tableView = document.getElementById('employeesTableView');
+            const viewButtons = document.querySelectorAll('.view-toggle-btn');
+
+            if (!cardsView || !tableView) {
+                console.error('❌ View containers not found');
+                return;
+            }
+
+            // Update button states
+            viewButtons.forEach(btn => btn.classList.remove('active'));
+            const activeButton = document.querySelector(`[data-view="${view}"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+
+            // Toggle view visibility
+            if (view === 'cards') {
+                cardsView.style.display = 'grid';
+                tableView.style.display = 'none';
+            } else if (view === 'table') {
+                cardsView.style.display = 'none';
+                tableView.style.display = 'block';
+            }
+            
+            console.log(`✅ Switched to ${view} view`);
+        }
+
+        function updateEmployeeStats(count) {
+            const totalEl = document.querySelector('.stat-mini-value');
+            if (totalEl) totalEl.textContent = count;
+        }
+
+        // Handle form submission for Add Employee
+        document.getElementById('addEmployeeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const employeeData = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                position: formData.get('position') || '',
+                department: formData.get('department') || ''
+            };
+
+            try {
+                // Show loading state
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+                submitBtn.disabled = true;
+
+                // Send request to backend
+                const response = await fetch('/employee/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(employeeData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Success - show QR code
+                    showQRCode(result.qr_code, employeeData.name, result.employee_id);
+                    closeAddEmployeeModal();
+                    showNotification('Employee added successfully!', 'success');
+                    
+                    // Refresh employee list
+                    setTimeout(() => {
+                        loadEmployees();
+                    }, 1000);
+                } else {
+                    // Error
+                    showNotification(result.error || 'Failed to add employee', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding employee:', error);
+                showNotification('Network error. Please try again.', 'error');
+            } finally {
+                // Reset button state
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+<script>
+(function(){
+    const base = window.location.origin.includes(':5000') ? window.location.origin : 'http://localhost:5000';
+    const navLinks = [
+        ['a.nav-link[href="dashboard.html"]', '/dashboard.html'],
+        ['a.nav-link[href="employees-new.html"]', '/employees-new.html'],
+        ['a.nav-link[href="employees.html"]', '/employees.html'],
+        ['a.nav-link[href="scanner.html"]', '/scanner.html'],
+        ['a.nav-link[href="reports.html"]', '/reports.html']
+    ];
+    navLinks.forEach(([sel, path]) => {
+        const el = document.querySelector(sel);
+        if (el) el.href = base + path;
+    });
+})();
+</script>
+</html>

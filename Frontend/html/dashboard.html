@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance Dashboard - Modern Analytics & Management</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Dashboard Specific Styles */
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .dashboard-welcome {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .dashboard-greeting {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dashboard-subtitle {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card-enhanced {
+            background: var(--surface-50);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--surface-200);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-500), var(--primary-600), var(--primary-700));
+        }
+
+        .stat-card-enhanced:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-header-enhanced {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-icon-enhanced {
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            background: linear-gradient(135deg, var(--primary-100), var(--primary-200));
+            color: var(--primary-600);
+        }
+
+        .stat-content {
+            flex: 1;
+            margin-left: 1rem;
+        }
+
+        .stat-title-enhanced {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value-enhanced {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change-enhanced {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .change-positive {
+            color: var(--success-600);
+        }
+
+        .change-negative {
+            color: var(--danger-600);
+        }
+
+        .change-neutral {
+            color: var(--text-secondary);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: var(--surface-50);
+            border-radius: var(--radius-xl);
+            padding: 1rem 1.25rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--surface-200);
+            max-height: 1200px;
+            overflow: hidden;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-period-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--surface-300);
+            background: var(--surface-50);
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .chart-period-btn:hover {
+            border-color: var(--primary-300);
+            background: var(--primary-50);
+        }
+
+        .chart-period-btn.active {
+            border-color: var(--primary-500);
+            background: var(--primary-50);
+            color: var(--primary-700);
+        }
+
+        .activity-feed {
+            background: var(--surface-50);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--surface-200);
+        }
+
+        .activity-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .activity-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--surface-100);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-fast);
+        }
+
+        .activity-item:hover {
+            background: var(--surface-200);
+            transform: translateX(4px);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            background: var(--primary-100);
+            color: var(--primary-600);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-card {
+            background: var(--surface-50);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--surface-200);
+            transition: all var(--transition-normal);
+            cursor: pointer;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-100), var(--primary-200));
+            color: var(--primary-600);
+        }
+
+        .action-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .action-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .system-status {
+            background: var(--surface-50);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--surface-200);
+        }
+
+        .system-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .system-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .system-indicators {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-700);
+        }
+
+        .status-offline {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-700);
+        }
+
+        .status-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-700);
+        }
+
+        .system-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .metric-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--surface-100);
+            border-radius: var(--radius-lg);
+        }
+
+        .metric-label {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .metric-value {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-greeting {
+                font-size: 2rem;
+            }
+
+            .dashboard-subtitle {
+                font-size: 1rem;
+            }
+
+            .stat-card-enhanced {
+                padding: 1.5rem;
+            }
+
+            .stat-value-enhanced {
+                font-size: 2rem;
+            }
+
+            .chart-container,
+            .activity-feed,
+            .system-status {
+                padding: 1.5rem;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-header {
+                padding: 1.5rem 0;
+            }
+
+            .dashboard-greeting {
+                font-size: 1.75rem;
+            }
+
+            .stat-header-enhanced {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .stat-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body class="page-container">
+    <!-- Modern Sidebar Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="dashboard.html" class="nav-brand profile-brand" style="gap:12px;">
+                <div class="brand-logo-wrap"><img src="/images/images.png" alt="ECC" class="brand-logo-img"></div>
+                <div class="brand-text">
+                    <h1 style="margin:0;color:#fff;font-size:1.5rem;">ECC Smart Attendance</h1>
+                    <span class="brand-subtitle" data-i18n="adminDashboard" style="color:rgba(255,255,255,.85)">Admin Dashboard</span>
+                </div>
+            </a>
+            <div class="nav-menu" style="align-items:center; gap:.75rem;">
+                <button id="langToggleNav" class="btn btn-outline btn-sm" style="margin-right:.25rem;">አማርኛ / EN</button>
+                <a href="dashboard.html" class="nav-link active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span data-i18n="dashboard">Dashboard</span>
+                </a>
+                <a href="employees.html" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span data-i18n="employees">Employees</span>
+                </a>
+                <a href="scanner.html" class="nav-link">
+                    <i class="fas fa-qrcode"></i>
+                    <span data-i18n="scanner">Scanner</span>
+                </a>
+                <a href="reports.html" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    <span data-i18n="reports">Reports</span>
+                </a>
+                <a href="#" class="nav-link" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span data-i18n="logout">Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+        <div class="container">
+            <div class="dashboard-welcome">
+                <h1 class="dashboard-greeting">Welcome back, Admin!</h1>
+                <p class="dashboard-subtitle">Here's what's happening with your attendance system today</p>
+
+                <!-- Quick Stats Overview -->
+                <div class="dashboard-stats">
+                    <div class="stat-card-enhanced">
+                        <div class="stat-header-enhanced">
+                            <div class="stat-icon-enhanced">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-title-enhanced">Total Employees</div>
+                                <div class="stat-value-enhanced" id="totalEmployees">0</div>
+                                <div class="stat-change-enhanced change-positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="employeeGrowth">+0 this month</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card-enhanced">
+                        <div class="stat-header-enhanced">
+                            <div class="stat-icon-enhanced">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-title-enhanced">Present Today</div>
+                                <div class="stat-value-enhanced" id="presentToday">0</div>
+                                <div class="stat-change-enhanced" id="attendanceChange">
+                                    <i class="fas fa-minus"></i>
+                                    <span>0% from yesterday</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card-enhanced">
+                        <div class="stat-header-enhanced">
+                            <div class="stat-icon-enhanced">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-title-enhanced">Avg Check-in</div>
+                                <div class="stat-value-enhanced" id="avgCheckIn">9:00 AM</div>
+                                <div class="stat-change-enhanced change-neutral">
+                                    <i class="fas fa-equals"></i>
+                                    <span>On time</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card-enhanced">
+                        <div class="stat-header-enhanced">
+                            <div class="stat-icon-enhanced">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-title-enhanced">Alerts</div>
+                                <div class="stat-value-enhanced" id="activeAlerts">0</div>
+                                <div class="stat-change-enhanced change-neutral">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>All systems normal</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Content -->
+    <main class="container">
+        <!-- Charts and Activity Grid -->
+        <div class="dashboard-grid">
+            <!-- Attendance Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2 class="chart-title">Attendance Overview</h2>
+                    <div class="chart-controls">
+                        <button class="chart-period-btn active" data-period="7">7 Days</button>
+                        <button class="chart-period-btn" data-period="30">30 Days</button>
+                        <button class="chart-period-btn" data-period="90">90 Days</button>
+                    </div>
+                </div>
+                <canvas id="attendanceChart" width="700" height="1000"></canvas>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="activity-feed">
+                <div class="activity-header">
+                    <h2 class="activity-title">Recent Activity</h2>
+                    <button class="btn btn-ghost btn-sm">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
+                <div class="activity-list" id="activityList">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">New employee registered</div>
+                            <div class="activity-time">2 minutes ago</div>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">QR code scanned</div>
+                            <div class="activity-time">5 minutes ago</div>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">Attendance marked</div>
+                            <div class="activity-time">10 minutes ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions and System Status -->
+        <div class="dashboard-grid">
+            <!-- Quick Actions -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2 class="chart-title">Quick Actions</h2>
+                </div>
+                <div class="quick-actions">
+                    <div class="action-card" onclick="window.location.href='scanner.html'">
+                        <div class="action-icon">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <h3 class="action-title">Start Scanner</h3>
+                        <p class="action-description">Begin attendance scanning with QR codes or face recognition</p>
+                    </div>
+
+                    <div class="action-card" onclick="window.location.href='employees.html'">
+                        <div class="action-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="action-title">Manage Employees</h3>
+                        <p class="action-description">Add, edit, or remove employee records</p>
+                    </div>
+
+                    <div class="action-card" onclick="window.location.href='reports.html'">
+                        <div class="action-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h3 class="action-title">View Reports</h3>
+                        <p class="action-description">Generate detailed attendance reports and analytics</p>
+                    </div>
+
+                    
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="system-status">
+                <div class="system-header">
+                    <h2 class="system-title">System Status</h2>
+                    <div class="system-indicators">
+                        <div class="status-indicator status-online">
+                            <i class="fas fa-circle"></i>
+                            <span>Online</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="system-metrics">
+                    <div class="metric-item">
+                        <div class="metric-label">Database</div>
+                        <div class="metric-value">
+                            <i class="fas fa-circle" style="color: var(--success-500);"></i>
+                            Connected
+                        </div>
+                    </div>
+
+                    <div class="metric-item">
+                        <div class="metric-label">Face Recognition</div>
+                        <div class="metric-value">
+                            <i class="fas fa-circle" style="color: var(--success-500);"></i>
+                            Active
+                        </div>
+                    </div>
+
+                    <div class="metric-item">
+                        <div class="metric-label">QR Scanner</div>
+                        <div class="metric-value">
+                            <i class="fas fa-circle" style="color: var(--success-500);"></i>
+                            Ready
+                        </div>
+                    </div>
+
+                    <div class="metric-item">
+                        <div class="metric-label">Last Backup</div>
+                        <div class="metric-value">
+                            <i class="fas fa-clock"></i>
+                            2 hours ago
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3>Loading Dashboard...</h3>
+            <p>Fetching your attendance data</p>
+        </div>
+    </div>
+
+    <script src="../js/dashboard.js"></script>
+    <script>
+        // Enhanced dashboard functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize dashboard
+            initializeDashboard();
+
+            // Chart period selector
+            const periodButtons = document.querySelectorAll('.chart-period-btn');
+            periodButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    periodButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    updateChart(this.dataset.period);
+                });
+            });
+
+            // Quick action handlers
+            // exportData removed per request
+        });
+
+        function initializeDashboard() {
+            // Show loading overlay
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = 'flex';
+
+            // Simulate loading time
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                loadDashboardData();
+                initializeCharts();
+            }, 1500);
+        }
+
+        function loadDashboardData() {
+            // Simulate API calls - replace with actual API calls
+            document.getElementById('totalEmployees').textContent = '1,247';
+            document.getElementById('employeeGrowth').textContent = '+12 this month';
+            document.getElementById('presentToday').textContent = '892';
+            document.getElementById('avgCheckIn').textContent = '9:15 AM';
+            document.getElementById('activeAlerts').textContent = '0';
+        }
+
+        function initializeCharts() {
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Present',
+                        data: [850, 920, 880, 950, 890, 200, 150],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Late',
+                        data: [45, 35, 52, 28, 41, 12, 8],
+                        borderColor: 'rgb(245, 158, 11)',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        }
+
+        function updateChart(period) {
+            console.log('Updating chart for period:', period);
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear any session data
+                sessionStorage.clear();
+                localStorage.clear();
+
+                // Show loading
+                const overlay = document.getElementById('loadingOverlay');
+                overlay.style.display = 'flex';
+                document.querySelector('.loading-content h3').textContent = 'Logging out...';
+                document.querySelector('.loading-content p').textContent = 'Please wait';
+
+                setTimeout(() => {
+                    const base = window.location.origin.includes(':5000') ? window.location.origin : 'http://localhost:5000';
+                    window.location.href = base + '/signin.html';
+                }, 1000);
+            }
+        }
+
+        // Add some interactive enhancements
+        const actionCards = document.querySelectorAll('.action-card');
+        actionCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(-4px) scale(1)';
+            });
+        });
+
+        // Add smooth animations to stat cards
+        const statCards = document.querySelectorAll('.stat-card-enhanced');
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        statCards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+<script>
+(function(){
+  const dict = {
+    en: { appName:'Smart Attendance', adminDashboard:'Admin Dashboard', dashboard:'Dashboard', employees:'Employees', scanner:'Scanner', reports:'Reports', logout:'Logout' },
+    am: { appName:'ስማርት አቴንዳንስ', adminDashboard:'የአስተዳዳሪ ዳሽቦርድ', dashboard:'ዳሽቦርድ', employees:'ሰራተኞች', scanner:'ስካነር', reports:'ሪፖርቶች', logout:'መውጣት' }
+  };
+  function applyLang(lang){
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const key = el.getAttribute('data-i18n');
+      if (dict[lang] && dict[lang][key]) el.textContent = dict[lang][key];
+    });
+    localStorage.setItem('lang', lang);
+  }
+  // Add toggle button
+  const btn = document.getElementById('langToggleNav');
+  if (btn) btn.onclick = ()=>{ const next=(localStorage.getItem('lang')||'en')==='en'?'am':'en'; applyLang(next); };
+  applyLang(localStorage.getItem('lang')||'en');
+})();
+</script>
+<script>
+(function(){
+  const base = window.location.origin.includes(':5000') ? window.location.origin : 'http://localhost:5000';
+  const links = [
+    ['a.nav-link[href="dashboard.html"]', '/dashboard.html'],
+    ['a.nav-link[href="employees.html"]', '/employees.html'],
+    ['a.nav-link[href="scanner.html"]', '/scanner.html'],
+    ['a.nav-link[href="reports.html"]', '/reports.html']
+  ];
+  links.forEach(([sel, path]) => {
+    const el = document.querySelector(sel);
+    if (el) el.href = base + path;
+  });
+  const remap = (sel, path) => {
+    const el = document.querySelector(sel);
+    if (el) el.setAttribute('onclick', `window.location.href='${base}${path}'`);
+  };
+  remap('.action-card[onclick*="employees.html"]', '/employees.html');
+  remap('.action-card[onclick*="scanner.html"]', '/scanner.html');
+  remap('.action-card[onclick*="reports.html"]', '/reports.html');
+})();
+</script>
+</html>

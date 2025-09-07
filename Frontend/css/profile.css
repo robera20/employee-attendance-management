@@ -1,0 +1,23 @@
+.profile-container { padding-top: 1.5rem; }
+.profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.profile-card { background: var(--surface-50, #fff); border: 1px solid var(--surface-200, #e5e7eb); border-radius: var(--radius-xl, 16px); box-shadow: var(--shadow-md, 0 10px 25px rgba(0,0,0,.06)); padding: 1.25rem; }
+.profile-title { font-weight: 700; margin: 0 0 1rem; color: var(--text-primary, #111827); display: flex; align-items: center; gap: .5rem; }
+.profile-form { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.profile-form .form-group { display: flex; flex-direction: column; gap: .5rem; }
+.profile-form .input { width: 100%; padding: .75rem .875rem; border: 2px solid var(--surface-300, #e5e7eb); border-radius: .75rem; background: var(--surface-50, #fff); font-size: 1rem; }
+.profile-form .input:focus { outline: none; border-color: var(--primary-500, #3b82f6); box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
+.profile-actions { grid-column: 1 / -1; display: flex; gap: .75rem; justify-content: flex-start; }
+.toast { position: fixed; top: 16px; right: 16px; z-index: 10000; color: #fff; padding: 10px 12px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.18); display: flex; align-items: center; gap: 8px; }
+.toast.success { background: #16a34a; }
+.toast.error { background: #dc2626; }
+.toast.info { background: #2563eb; }
+@media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } .profile-form { grid-template-columns: 1fr; } }
+
+/* Brand styling for profile header */
+.profile-brand { display:flex; align-items:center; gap: .75rem; text-decoration:none; }
+.profile-brand .brand-logo-wrap { height: 23px; width: 23px; border-radius: 6px; overflow:hidden; background: linear-gradient(135deg,#3b82f6,#8b5cf6); display:flex; align-items:center; justify-content:center; box-shadow: 0 6px 14px rgba(59,130,246,.28); }
+.profile-brand .brand-logo-img { height: 70%; width: 70%; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0,0,0,.18)); }
+.profile-brand .brand-text { display:flex; flex-direction:column; line-height:1; }
+.profile-brand .brand-title { font-weight: 800; font-size: 1.125rem; color: var(--text-primary, #111827); letter-spacing: .2px; }
+.profile-brand .brand-subtitle { font-size: .75rem; color: var(--text-secondary, #6b7280); margin-top: 2px; }
+
