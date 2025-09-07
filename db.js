@@ -1,6 +1,6 @@
 const mysql = require('mysql2');
 
-// Database configuration for PlanetScale (production) or XAMPP (local)
+// Database configuration for FreeDB.tech (production) or XAMPP (local)
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
