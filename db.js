@@ -23,7 +23,7 @@ console.log('DB_SSL:', process.env.DB_SSL || 'false (default)');
 console.log('NODE_ENV:', process.env.NODE_ENV || 'development (default)');
 
 // Create connection pool without database initially
-const pool = mysql.createPool({
+const poolConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
@@ -33,7 +33,17 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
+};
+
+console.log('🔍 Pool Configuration:', {
+  host: poolConfig.host,
+  user: poolConfig.user,
+  port: poolConfig.port,
+  database: poolConfig.database,
+  ssl: poolConfig.ssl
 });
+
+const pool = mysql.createPool(poolConfig);
 
 // Function to ensure database exists and is selected
 async function ensureDatabase() {
@@ -138,16 +148,38 @@ async function executeSelect(sql, params = []) {
   }
 }
 
+// Test database connection with direct connection first
+const testConnection = mysql.createConnection({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  port: process.env.DB_PORT || 3306,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
+});
+
+console.log('🔍 Testing direct connection to:', process.env.DB_HOST || 'localhost');
+
+testConnection.connect((err) => {
+  if (err) {
+    console.error('❌ Direct connection failed:', err.message);
+    console.log('🔍 Error details:', err);
+    return;
+  }
+  
+  console.log('✅ Direct connection successful!');
+  testConnection.end();
+});
+
 // Test database connection
 pool.getConnection((err, connection) => {
   if (err) {
-    console.error('❌ Database connection failed:', err.message);
+    console.error('❌ Pool connection failed:', err.message);
     console.log('💡 Make sure database is running and accessible');
     console.log('🔍 Attempting connection to:', process.env.DB_HOST || 'localhost');
     return;
   }
   
-  console.log('✅ Connected to database successfully');
+  console.log('✅ Pool connection successful');
   console.log('🔍 Connected to host:', process.env.DB_HOST || 'localhost');
   connection.release();
 });
